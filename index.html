@@ -1455,7 +1455,7 @@ function updateNewsRefreshTime(timestamp) {
   const h = String(d.getHours()).padStart(2,'0');
   const m = String(d.getMinutes()).padStart(2,'0');
   const label = document.querySelector('#tab-news .section-label:last-child');
-  if (label) label.textContent = `实时热点 · 最后更新 ${h}:${m}（每6小时自动刷新）`;
+  if (label) label.textContent = `实时热点 · 最后更新 ${h}:${m}（每6小时自动刷新·以天为基准）`;
 }
 
 // 手动刷新按钮
@@ -1500,6 +1500,93 @@ function updateClock() {
 }
 setInterval(updateClock, 1000);
 updateClock();
+
+// ===== 每日更新机制（拉伸/播客/英语 以天为单位轮换）=====
+const DAILY_KEY = 'dudu_daily_stamp';
+
+// 获取今天是第几天（用于轮换种子）
+function getDayIndex() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now - start;
+  return Math.floor(diff / (1000 * 60 * 60 * 24));
+}
+
+// 检查是否跨天（新的一天到来时触发更新）
+function checkDailyRefresh() {
+  const today = new Date().toDateString();
+  const lastDay = localStorage.getItem(DAILY_KEY);
+  if (lastDay !== today) {
+    localStorage.setItem(DAILY_KEY, today);
+    rotateDailyContent();
+    updateDailyLabels();
+  }
+}
+
+// 轮换每日内容顺序
+function rotateDailyContent() {
+  const dayIdx = getDayIndex();
+
+  // 轮换拉伸视频卡片顺序
+  const stretchCards = document.querySelectorAll('#tab-stretch .resource-card');
+  const stretchArr = Array.from(stretchCards);
+  if (stretchArr.length > 1) {
+    const offset = dayIdx % stretchArr.length;
+    const reordered = [...stretchArr.slice(offset), ...stretchArr.slice(0, offset)];
+    const parent = stretchArr[0].parentElement;
+    reordered.forEach(c => parent.appendChild(c));
+  }
+
+  // 轮换播客卡片顺序
+  const podcastCards = document.querySelectorAll('#tab-podcast .podcast-card');
+  const podcastArr = Array.from(podcastCards);
+  if (podcastArr.length > 1) {
+    const offset = dayIdx % podcastArr.length;
+    const reordered = [...podcastArr.slice(offset), ...podcastArr.slice(0, offset)];
+    const parent = podcastArr[0].parentElement;
+    reordered.forEach(c => parent.appendChild(c));
+  }
+
+  // 轮换英语学习卡片顺序
+  const engCards = document.querySelectorAll('#tab-english .resource-card');
+  const engArr = Array.from(engCards);
+  if (engArr.length > 1) {
+    const offset = dayIdx % engArr.length;
+    const reordered = [...engArr.slice(offset), ...engArr.slice(0, offset)];
+    const parent = engArr[0].parentElement;
+    reordered.forEach(c => parent.appendChild(c));
+  }
+}
+
+// 更新各版块的"今日更新"标签
+function updateDailyLabels() {
+  const today = new Date();
+  const m = String(today.getMonth()+1).padStart(2,'0');
+  const d = String(today.getDate()).padStart(2,'0');
+  const dateStr = `${m}/${d}`;
+
+  // 拉伸Tab标签
+  const stretchLabel = document.querySelector('#tab-stretch .section-label');
+  if (stretchLabel) stretchLabel.textContent = `拉伸跟练视频 · 今日更新 ${dateStr}`;
+
+  // 播客Tab标签
+  const podcastLabel = document.querySelector('#tab-podcast .section-label');
+  if (podcastLabel) podcastLabel.textContent = `小宇宙播客 · 今日推荐 ${dateStr}`;
+
+  // 英语Tab标签
+  const tedLabel = document.querySelector('#tab-english .section-label');
+  if (tedLabel) tedLabel.textContent = `TED 演讲学习 · 今日推荐 ${dateStr}`;
+
+  const bbcLabel = document.querySelectorAll('#tab-english .section-label')[1];
+  if (bbcLabel) bbcLabel.textContent = `BBC 英语学习 · 今日推荐 ${dateStr}`;
+}
+
+// 页面加载时执行每日检查
+checkDailyRefresh();
+updateDailyLabels();
+
+// 每分钟检查一次是否跨天（凌晨自动刷新）
+setInterval(checkDailyRefresh, 60000);
 
 // ===== Tab 切换 =====
 function switchTab(tabName) {
