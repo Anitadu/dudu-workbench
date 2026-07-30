@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="杜杜工作台">
+<meta name="theme-color" content="#fef6e4">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%236366f1'/%3E%3Cstop offset='100%25' style='stop-color:%238b5cf6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='180' height='180' rx='40' fill='url(%23g)'/%3E%3Ctext x='90' y='125' font-size='80' text-anchor='middle' fill='white'%3E🌿%3C/text%3E%3C/svg%3E">
+<title>杜杜工作台</title>
+<style>
+  :root {
+    --bg-primary: #fef6e4;
+    --bg-card: #ffffff;
+    --bg-card-hover: #fef9f0;
+    --bg-input: #fff8ec;
+    --accent-primary: #f582ae;
+    --accent-secondary: #8bd3dd;
+    --accent-success: #84cc16;
+    --accent-warning: #fb923c;
+    --accent-danger: #f43f5e;
+    --accent-pink: #ec4899;
+    --accent-coral: #ff6b6b;
+    --accent-mint: #4ecdc4;
+    --accent-sun: #ffd93d;
+    --accent-sky: #6ec6ff;
+    --accent-grape: #a78bfa;
+    --text-primary: #2d3142;
+    --text-secondary: #4f5d75;
+    --text-muted: #8d99a8;
+    --border-color: #f0e7d8;
+    --safe-top: env(safe-area-inset-top, 44px);
+    --safe-bottom: env(safe-area-inset-bottom, 34px);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    padding-top: var(--safe-top);
+    padding-bottom: calc(var(--safe-bottom) + 80px);
+    background:
+      radial-gradient(circle at 0% 0%, rgba(245,130,174,0.15) 0%, transparent 40%),
+      radial-gradient(circle at 100% 0%, rgba(139,211,221,0.15) 0%, transparent 40%),
+      radial-gradient(circle at 50% 100%, rgba(255,217,61,0.12) 0%, transparent 50%),
+      #fef6e4;
+  }
+
+  /* ===== 顶部头部 ===== */
+  .header {
+    padding: 16px 20px 20px;
+  }
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .header-greeting {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+  .header-greeting .name {
+    color: var(--accent-primary);
+    font-weight: 700;
+  }
+  .header-clock {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+    background: #fff;
+    padding: 4px 12px;
+    border-radius: 12px;
+  }
+
+  .header-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #f582ae 0%, #ff6b6b 25%, #ffd93d 50%, #4ecdc4 75%, #6ec6ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+  }
+  .header-date {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  /* ===== 进度卡片 ===== */
+  .progress-card {
+    margin: 0 16px 20px;
+    background: linear-gradient(135deg, #ff6b6b 0%, #f582ae 50%, #ffd93d 100%);
+    border-radius: 20px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 8px 32px rgba(255,107,107,0.3);
+  }
+  .progress-ring {
+    position: relative;
+    width: 72px; height: 72px;
+    flex-shrink: 0;
+  }
+  .progress-ring svg { transform: rotate(-90deg); }
+  .progress-ring .bg-ring { stroke: rgba(255,255,255,0.3); }
+  .progress-ring .fg-ring {
+    stroke: white;
+    transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .progress-ring .pct {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: white;
+  }
+  .progress-info { flex: 1; color: white; }
+  .progress-info h2 { font-size: 1.1rem; margin-bottom: 4px; font-weight: 700; }
+  .progress-info p { font-size: 0.82rem; opacity: 0.9; line-height: 1.4; }
+
+  /* ===== Tab 导航 ===== */
+  .tab-bar {
+    display: flex;
+    gap: 8px;
+    padding: 0 16px 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0;
+    padding: 8px 18px;
+    border-radius: 20px;
+    background: #fff;
+    border: 2px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tab.active {
+    background: linear-gradient(135deg, #f582ae, #ff6b6b);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 14px rgba(245,130,174,0.4);
+  }
+
+  /* ===== 内容区域 ===== */
+  .content { padding: 0 16px; }
+  .tab-content { display: none; animation: fadeIn 0.3s ease; }
+  .tab-content.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ===== 任务卡片 ===== */
+  .task-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    border: 2px solid var(--border-color);
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+  }
+  .task-card:active { transform: scale(0.97); }
+  .task-card.done {
+    opacity: 0.6;
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+  }
+  .task-card.done .task-name { text-decoration: line-through; color: var(--text-muted); }
+
+  .task-check {
+    width: 28px; height: 28px;
+    border-radius: 10px;
+    border: 2.5px solid #ddd;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    color: transparent;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  .task-card.done .task-check {
+    background: var(--accent-success);
+    border-color: var(--accent-success);
+    color: white;
+  }
+
+  .task-body { flex: 1; min-width: 0; }
+  .task-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; color: var(--text-primary); }
+  .task-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-weight: 600;
+  }
+  .tag.time { background: #fff3cd; color: #d97706; }
+  .tag.dur { background: #fce7f3; color: #db2777; }
+  .tag.freq { background: #dbeafe; color: #2563eb; }
+
+  .task-action {
+    width: 36px; height: 36px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f582ae, #ff6b6b);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    box-shadow: 0 3px 10px rgba(245,130,174,0.3);
+  }
+  .task-action:active { transform: scale(0.9); }
+
+  /* ===== 新闻卡片 ===== */
+  .news-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border: 2px solid var(--border-color);
+    border-left: 4px solid var(--accent-secondary);
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s;
+    display: block;
+  }
+  .news-card:active { background: var(--bg-card-hover); }
+  .news-card.hot { border-left-color: var(--accent-coral); }
+  .news-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .news-time { color: var(--text-muted); font-size: 0.72rem; font-weight: 600; }
+  .news-cat {
+    font-size: 0.65rem;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+  }
+  .news-cat.domestic { background: #d1fae5; color: #059669; }
+  .news-cat.international { background: #fef3c7; color: #d97706; }
+  .news-hot { font-size: 0.65rem; color: var(--accent-coral); font-weight: 700; }
+  .news-title { font-size: 0.88rem; line-height: 1.5; color: var(--text-secondary); font-weight: 500; }
+
+  /* ===== 资源卡片 ===== */
+  .resource-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+    border: 2px solid var(--border-color);
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s;
+    display: block;
+  }
+  .resource-card:active { transform: scale(0.97); border-color: var(--accent-primary); box-shadow: 0 4px 16px rgba(245,130,174,0.2); }
+  .resource-icon {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+  }
+  .resource-title { font-weight: 700; font-size: 0.92rem; margin-bottom: 6px; color: var(--text-primary); }
+  .resource-desc { color: var(--text-muted); font-size: 0.8rem; line-height: 1.5; }
+  .resource-platform {
+    display: inline-block;
+    font-size: 0.68rem;
+    padding: 2px 10px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+    color: #be185d;
+    margin-top: 8px;
+    font-weight: 600;
+  }
+
+  /* ===== 底部导航 ===== */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    padding: 8px 0 calc(var(--safe-bottom) + 6px);
+    z-index: 100;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 0;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .nav-item.active { color: var(--accent-coral); }
+  .nav-icon { font-size: 1.3rem; }
+  .nav-label { font-size: 0.62rem; font-weight: 600; }
+
+  /* ===== 通知 ===== */
+  .notif-permission {
+    margin: 0 16px 16px;
+    background: linear-gradient(135deg, #fff3cd, #ffe4e6);
+    border: 2px solid #fde68a;
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: none;
+    align-items: center;
+    gap: 12px;
+  }
+  .notif-permission.show { display: flex; }
+  .notif-permission .info { flex: 1; }
+  .notif-permission p { font-size: 0.82rem; color: var(--text-secondary); font-weight: 500; }
+  .notif-permission button {
+    background: linear-gradient(135deg, #f582ae, #ff6b6b);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 3px 10px rgba(245,130,174,0.3);
+  }
+
+  /* ===== Toast 通知 ===== */
+  .toast {
+    position: fixed;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: linear-gradient(135deg, #84cc16, #4ecdc4);
+    border: none;
+    border-radius: 16px;
+    padding: 12px 24px;
+    box-shadow: 0 8px 32px rgba(132,204,22,0.3);
+    z-index: 9999;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-size: 0.88rem;
+    color: white;
+    font-weight: 600;
+    white-space: nowrap;
+    max-width: 90vw;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ===== 设置区域 ===== */
+  .settings-section {
+    background: #fff;
+    border-radius: 14px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+  }
+  .settings-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+  }
+  .settings-item:last-child { border-bottom: none; }
+  .settings-item:active { background: var(--bg-card-hover); }
+  .settings-icon {
+    width: 32px; height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .settings-label { flex: 1; font-size: 0.9rem; color: var(--text-primary); }
+  .settings-value { color: var(--text-muted); font-size: 0.82rem; font-weight: 500; }
+
+  /* Switch */
+  .switch {
+    position: relative;
+    width: 44px; height: 26px;
+    background: #e5e7eb;
+    border-radius: 13px;
+    transition: background 0.3s;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .switch.on { background: var(--accent-success); }
+  .switch::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 22px; height: 22px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+  .switch.on::after { transform: translateX(18px); }
+
+  .section-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0 4px 10px;
+    font-weight: 700;
+  }
+
+  /* 滚动区域 */
+  .scroll-area {
+    max-height: calc(100vh - 380px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 12px;
+  }
+  .scroll-area::-webkit-scrollbar { width: 3px; }
+  .scroll-area::-webkit-scrollbar-thumb { background: #f582ae; border-radius: 2px; }
+
+  /* ===== 平台热搜网格 ===== */
+  .platform-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .platform-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 14px 6px;
+    text-align: center;
+    border: 2px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .platform-card:active { transform: scale(0.92); border-color: var(--accent-primary); }
+  .platform-emoji { font-size: 1.6rem; }
+  .platform-name { font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; }
+  .platform-card.weibo { background: linear-gradient(135deg, #fee2e2, #fff); border-color: #fecaca; }
+  .platform-card.xhs { background: linear-gradient(135deg, #fce7f3, #fff); border-color: #fbcfe8; }
+  .platform-card.zhihu { background: linear-gradient(135deg, #dbeafe, #fff); border-color: #bfdbfe; }
+  .platform-card.douyin { background: linear-gradient(135deg, #f3e8ff, #fff); border-color: #e9d5ff; }
+  .platform-card.toutiao { background: linear-gradient(135deg, #fef3c7, #fff); border-color: #fde68a; }
+  .platform-card.bilibili { background: linear-gradient(135deg, #fee2e2, #fff); border-color: #fecaca; }
+  .platform-card.baidu { background: linear-gradient(135deg, #dbeafe, #fff); border-color: #bfdbfe; }
+  .platform-card.tencent { background: linear-gradient(135deg, #d1fae5, #fff); border-color: #a7f3d0; }
+
+  /* ===== 播客横幅 ===== */
+  .podcast-banner {
+    background: linear-gradient(135deg, #a78bfa 0%, #f582ae 50%, #ffd93d 100%);
+    border-radius: 16px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(99,102,241,0.3);
+    transition: transform 0.2s;
+    margin-bottom: 4px;
+  }
+  .podcast-banner:active { transform: scale(0.97); }
+  .podcast-banner-icon {
+    font-size: 2rem;
+    width: 48px; height: 48px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .podcast-banner-text { flex: 1; color: white; }
+  .podcast-banner-title { font-size: 1rem; font-weight: 700; }
+  .podcast-banner-desc { font-size: 0.78rem; opacity: 0.85; margin-top: 2px; }
+  .podcast-banner-arrow { color: white; font-size: 1.5rem; opacity: 0.7; }
+
+  /* ===== 播客卡片 ===== */
+  .podcast-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border: 2px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .podcast-card:active { transform: scale(0.97); border-color: var(--accent-grape); box-shadow: 0 4px 16px rgba(167,139,250,0.2); }
+  .podcast-cover {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+  .podcast-info { flex: 1; min-width: 0; }
+  .podcast-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; color: var(--text-primary); }
+  .podcast-host { color: var(--text-muted); font-size: 0.75rem; margin-bottom: 4px; }
+  .podcast-desc { color: var(--text-secondary); font-size: 0.78rem; line-height: 1.4; }
+  .podcast-tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    padding: 2px 8px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+    color: #7c3aed;
+    margin-top: 6px;
+    font-weight: 600;
+  }
+
+  /* ===== 内嵌浏览器 (In-App Browser) ===== */
+  .iab-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #fef6e4;
+    display: none;
+    flex-direction: column;
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
+  }
+  .iab-overlay.show { display: flex; }
+  .iab-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: #fff;
+    border-bottom: 2px solid var(--border-color);
+    flex-shrink: 0;
+  }
+  .iab-back-btn {
+    width: 36px; height: 36px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f582ae, #ff6b6b);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    border: none;
+    box-shadow: 0 3px 10px rgba(245,130,174,0.3);
+  }
+  .iab-back-btn:active { transform: scale(0.9); }
+  .iab-title {
+    flex: 1;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .iab-open-external {
+    width: 36px; height: 36px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #4ecdc4, #6ec6ff);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    border: none;
+    box-shadow: 0 3px 10px rgba(78,205,196,0.3);
+  }
+  .iab-open-external:active { transform: scale(0.9); }
+  .iab-frame-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: white;
+  }
+  .iab-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: white;
+  }
+  .iab-loading {
+    position: absolute;
+    inset: 0;
+    background: #fef6e4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    z-index: 10;
+  }
+  .iab-spinner {
+    width: 40px; height: 40px;
+    border: 3px solid #f0e7d8;
+    border-top-color: #f582ae;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .iab-loading-text {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .iab-error {
+    position: absolute;
+    inset: 0;
+    background: #fef6e4;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 40px;
+    text-align: center;
+    z-index: 10;
+  }
+  .iab-error.show { display: flex; }
+  .iab-error-icon { font-size: 3rem; }
+  .iab-error-title { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
+  .iab-error-desc { color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; }
+  .iab-error-btn {
+    background: linear-gradient(135deg, #f582ae, #ff6b6b);
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 14px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- 头部 -->
+<div class="header">
+  <div class="header-top">
+    <div class="header-greeting">你好，<span class="name">杜杜</span> 👋</div>
+    <div class="header-clock" id="clock">10:05</div>
+  </div>
+  <div class="header-title">🌿 杜杜工作台</div>
+  <div class="header-date" id="dateStr">2026年7月27日 星期一</div>
+</div>
+
+<!-- 进度卡片 -->
+<div class="progress-card">
+  <div class="progress-ring">
+    <svg width="72" height="72">
+      <circle class="bg-ring" cx="36" cy="36" r="30" fill="none" stroke-width="5"/>
+      <circle class="fg-ring" id="progressFg" cx="36" cy="36" r="30" fill="none" stroke-width="5"
+        stroke-dasharray="188.5" stroke-dashoffset="188.5" stroke-linecap="round"/>
+    </svg>
+    <div class="pct" id="progressText">0%</div>
+  </div>
+  <div class="progress-info">
+    <h2 id="progressTitle">今日任务进度</h2>
+    <p id="progressDetail">加油杜杜！开始今天的第一项任务吧 🚀</p>
+  </div>
+</div>
+
+<!-- 通知权限提示 -->
+<div class="notif-permission" id="notifPermission">
+  <div class="info">
+    <p>🔔 开启通知，9:20 按摩时间到点提醒</p>
+  </div>
+  <button onclick="requestNotification()">开启</button>
+</div>
+
+<!-- Tab栏 -->
+<div class="tab-bar">
+  <div class="tab active" data-tab="tasks">📋 任务</div>
+  <div class="tab" data-tab="news">📰 热点</div>
+  <div class="tab" data-tab="podcast">🎙 播客</div>
+  <div class="tab" data-tab="stretch">🧘 拉伸</div>
+  <div class="tab" data-tab="ted">📖 英语</div>
+  <div class="tab" data-tab="settings">⚙️ 设置</div>
+</div>
+
+<!-- 内容区 -->
+<div class="content">
+
+  <!-- 任务Tab -->
+  <div class="tab-content active" id="tab-tasks">
+    <div class="section-label">今日待办 · 点击勾选</div>
+    <div class="scroll-area" id="taskList">
+
+      <div class="task-card" data-task="stretch">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-name">拉伸视频跟练</div>
+          <div class="task-tags">
+            <span class="tag freq">每天1次</span>
+            <span class="tag dur">10-15分钟</span>
+          </div>
+        </div>
+        <div class="task-action" onclick="openUrl('https://www.bilibili.com/video/BV1zSN66fEQT/')">▶</div>
+      </div>
+
+      <div class="task-card" data-task="news">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-name">查看今日国内新闻热点</div>
+          <div class="task-tags">
+            <span class="tag freq">每天1次</span>
+            <span class="tag time">建议早上</span>
+          </div>
+        </div>
+        <div class="task-action" onclick="openUrl('https://news.163.com/latest/')">📰</div>
+      </div>
+
+      <div class="task-card" data-task="massage">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-name">按摩放松</div>
+          <div class="task-tags">
+            <span class="tag time">⏰ 09:20</span>
+            <span class="tag freq">每天1次</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-card" data-task="ted">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-name">TED + BBC 英语学习</div>
+          <div class="task-tags">
+            <span class="tag dur">30分钟</span>
+            <span class="tag freq">每天1次</span>
+          </div>
+        </div>
+        <div class="task-action" onclick="openUrl('https://www.ted.com/talks')">🎓</div>
+      </div>
+
+      <div class="task-card" data-task="bbc">
+        <div class="task-check">✓</div>
+        <div class="task-body">
+          <div class="task-name">BBC 新闻英语</div>
+          <div class="task-tags">
+            <span class="tag dur">15分钟</span>
+            <span class="tag freq">每天1次</span>
+          </div>
+        </div>
+        <div class="task-action" onclick="openUrl('https://www.bbc.com/learningenglish')">🇬🇧</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 热点Tab -->
+  <div class="tab-content" id="tab-news">
+    <!-- 平台快速入口 -->
+    <div class="section-label">平台热搜 · 一键直达</div>
+    <div class="platform-grid" id="platformGrid"></div>
+
+    <!-- 今日新闻热点 -->
+    <div class="section-label" style="margin-top:16px; display:flex; justify-content:space-between; align-items:center;">
+      <span id="newsLabel">今日新闻热点 · 07-28</span>
+      <span onclick="refreshNews()" style="color:var(--accent-primary); font-size:0.75rem; cursor:pointer; padding:4px 10px; background:rgba(245,130,174,0.15); border-radius:8px;">🔄 刷新</span>
+    </div>
+    <div class="scroll-area" id="newsList"></div>
+  </div>
+
+  <!-- 播客Tab -->
+  <div class="tab-content" id="tab-podcast">
+    <div class="section-label">小宇宙播客 · 每日收听</div>
+    <div class="podcast-banner" onclick="openUrl('https://www.xiaoyuzhoufm.com/')">
+      <div class="podcast-banner-icon">🎙</div>
+      <div class="podcast-banner-text">
+        <div class="podcast-banner-title">打开小宇宙 App</div>
+        <div class="podcast-banner-desc">听播客，上小宇宙</div>
+      </div>
+      <div class="podcast-banner-arrow">›</div>
+    </div>
+    <div class="section-label" style="margin-top:16px;">精选播客节目</div>
+    <div class="scroll-area" id="podcastList"></div>
+  </div>
+
+  <!-- 拉伸Tab -->
+  <div class="tab-content" id="tab-stretch">
+    <div class="section-label">拉伸跟练视频 · 每天1次</div>
+    <div class="scroll-area">
+      <div class="resource-card" onclick="openUrl('https://www.bilibili.com/video/BV1zSN66fEQT/')">
+        <div class="resource-icon">🦵</div>
+        <div class="resource-title">10分钟腿部拉伸 | 松解肌肉腿</div>
+        <div class="resource-desc">改善下肢循环，矫正腿型，按解说指示放松目标肌群，有拉伸感即可。</div>
+        <span class="resource-platform">Bilibili</span>
+      </div>
+      <div class="resource-card" onclick="openUrl('https://jingxuan.douyin.com/m/video/7622917148184268047')">
+        <div class="resource-icon">🧘</div>
+        <div class="resource-title">15分钟全身拉伸训练</div>
+        <div class="resource-desc">规律拉伸改善柔韧性、缓解肌肉紧张、提升身体恢复能力。</div>
+        <span class="resource-platform">抖音</span>
+      </div>
+      <div class="resource-card" onclick="openUrl('https://www.douyin.com/video/7413701865730346280')">
+        <div class="resource-icon">🧎</div>
+        <div class="resource-title">10分钟站立全身拉伸</div>
+        <div class="resource-desc">站立式拉伸，练完不受伤，健身必备，适合居家锻炼。</div>
+        <span class="resource-platform">抖音</span>
+      </div>
+      <div class="resource-card" onclick="openUrl('https://www.toutiao.com/video/7565069597456532022/')">
+        <div class="resource-icon">💆</div>
+        <div class="resource-title">全身拉伸放松指南</div>
+        <div class="resource-desc">10分钟缓解肌肉紧张完整跟练，适合久坐人群。</div>
+        <span class="resource-platform">今日头条</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 英语学习Tab（TED + BBC） -->
+  <div class="tab-content" id="tab-ted">
+    <div class="section-label">TED 演讲学习 · 每天30分钟</div>
+    <div class="scroll-area">
+      <div class="resource-card" onclick="openUrl('https://www.ted.com/talks')">
+        <div class="resource-icon">🎤</div>
+        <div class="resource-title">TED 官方演讲库</div>
+        <div class="resource-desc">海量演讲视频，支持字幕切换、语速调节，每日精选一篇精听。</div>
+        <span class="resource-platform">TED.com</span>
+      </div>
+      <div class="resource-card" onclick="openUrl('https://9english.net/zh/zh-listening-007-ted-talks-for-english-learning-best-talks')">
+        <div class="resource-icon">📚</div>
+        <div class="resource-title">TED演讲学英语：精选集与实用技巧</div>
+        <div class="resource-desc">从入门到精通，包括字幕利用、语速调整、跟读模仿等方法。</div>
+        <span class="resource-platform">9English</span>
+      </div>
+      <div class="resource-card" onclick="openUrl('https://post.smzdm.com/p/am97n58p/')">
+        <div class="resource-icon">📖</div>
+        <div class="resource-title">TED演讲学英语全攻略</div>
+        <div class="resource-desc">从选材到精听的完整方法，看完少走三年弯路。</div>
+        <span class="resource-platform">什么值得买</span>
+      </div>
+      <div class="resource-card" onclick="openUrl('https://www.douyin.com/video/7666416081849847081')">
+        <div class="resource-icon">🧠</div>
+        <div class="resource-title">TED演讲《运动改变大脑》</div>
+        <div class="resource-desc">每天快走30分钟就能预防老年痴呆？跟着TED学英语。</div>
+        <span class="resource-platform">抖音</span>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:18px;">BBC 英语学习 · 每天15分钟</div>
+    <div class="scroll-area">
+      <div class="resource-card" onclick="openUrl('https://www.bbc.com/learningenglish')">
+        <div class="resource-icon">🇬🇧</div>
+        <div class="resource-title">BBC Learning English 官网</div>
+        <div class="resource-desc">BBC官方英语学习平台，含6 Minute English、新闻词汇、语法课程等，分级学习。</div>
+        <span class="resource-platform">BBC</span>
+      </div>
+      <div class="resource-card" onclick="openUrl('https://www.bbc.com/news')">
+        <div class="resource-icon">📰</div>
+        <div class="resource-title">BBC News 英文新闻</div>
+        <div class="resource-desc">每日浏览BBC英文新闻，积累词汇、了解国际时事，练阅读最佳素材。</div>
+        <span class="resource-platform">BBC News</span>
+      </div>
+      <div class="resource-card" onclick="openUrl('https://www.bbc.co.uk/learningenglish/english/features/6-minute-english')">
+        <div class="resource-icon">⏱️</div>
+        <div class="resource-title">6 Minute English 六分钟英语</div>
+        <div class="resource-desc">BBC经典播客节目，每期6分钟一个话题，语速适中，适合每日精听跟读。</div>
+        <span class="resource-platform">BBC</span>
+      </div>
+      <div class="resource-card" onclick="openUrl('https://www.bbc.co.uk/learningenglish/english/course/towards-advanced/unit-1/session-1')">
+        <div class="resource-icon">🎓</div>
+        <div class="resource-title">BBC 英语课程（进阶）</div>
+        <div class="resource-desc">从初级到高级的系统性英语课程，含语法、词汇、发音全方位训练。</div>
+        <span class="resource-platform">BBC</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 设置Tab -->
+  <div class="tab-content" id="tab-settings">
+    <div class="section-label">提醒设置</div>
+    <div class="settings-section">
+      <div class="settings-item">
+        <div class="settings-icon" style="background:#fef3c7;">⏰</div>
+        <div class="settings-label">按摩提醒 (9:20)</div>
+        <div class="switch on" id="switchMassage" onclick="toggleSwitch('massage')"></div>
+      </div>
+      <div class="settings-item">
+        <div class="settings-icon" style="background:#d1fae5;">🧘</div>
+        <div class="settings-label">拉伸提醒 (每日)</div>
+        <div class="switch on" id="switchStretch" onclick="toggleSwitch('stretch')"></div>
+      </div>
+      <div class="settings-item">
+        <div class="settings-icon" style="background:#ede9fe;">📖</div>
+        <div class="settings-label">英语学习提醒 TED+BBC (每日)</div>
+        <div class="switch on" id="switchTed" onclick="toggleSwitch('ted')"></div>
+      </div>
+    </div>
+
+    <div class="section-label">数据管理</div>
+    <div class="settings-section">
+      <div class="settings-item" onclick="resetTasks()">
+        <div class="settings-icon" style="background:#fee2e2;">🔄</div>
+        <div class="settings-label">重置今日任务</div>
+        <div class="settings-value">恢复未完成</div>
+      </div>
+      <div class="settings-item" onclick="clearCache()">
+        <div class="settings-icon" style="background:#f3f4f6;">🗑</div>
+        <div class="settings-label">清除缓存</div>
+        <div class="settings-value">清理本地数据</div>
+      </div>
+    </div>
+
+    <div class="section-label">使用说明</div>
+    <div class="settings-section">
+      <div class="settings-item">
+        <div class="settings-icon" style="background:#dbeafe;">📱</div>
+        <div class="settings-label" style="font-size:0.82rem; line-height:1.5;">
+          <b>最佳体验：</b>用 Safari 打开→分享→添加到主屏幕。App 内链接会智能跳转，看完按 ‹ 返回
+        </div>
+      </div>
+      <div class="settings-item">
+        <div class="settings-icon" style="background:#fef3c7;">💬</div>
+        <div class="settings-label" style="font-size:0.82rem; line-height:1.5;">
+          <b>微信内打开：</b>受微信限制，链接会自动复制到剪贴板，请点右上角···用浏览器打开
+        </div>
+      </div>
+      <div class="settings-item">
+        <div class="settings-icon" style="background:#d1fae5;">↗</div>
+        <div class="settings-label" style="font-size:0.82rem; line-height:1.5;">
+          <b>外部打开：</b>内嵌浏览时点右上角 ↗ 可用 Safari 打开，支持分享给好友
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">关于</div>
+    <div class="settings-section">
+      <div class="settings-item">
+        <div class="settings-icon" style="background:#fce7f3;">🌿</div>
+        <div class="settings-label">杜杜工作台</div>
+        <div class="settings-value">v1.0.0</div>
+      </div>
+      <div class="settings-item">
+        <div class="settings-icon" style="background:#fce7f3;">❤️</div>
+        <div class="settings-label">为杜杜专属打造</div>
+        <div class="settings-value">2026.07</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 底部导航 -->
+<div class="bottom-nav">
+  <div class="nav-item active" data-tab="tasks">
+    <div class="nav-icon">📋</div>
+    <div class="nav-label">任务</div>
+  </div>
+  <div class="nav-item" data-tab="news">
+    <div class="nav-icon">📰</div>
+    <div class="nav-label">热点</div>
+  </div>
+  <div class="nav-item" data-tab="podcast">
+    <div class="nav-icon">🎙</div>
+    <div class="nav-label">播客</div>
+  </div>
+  <div class="nav-item" data-tab="stretch">
+    <div class="nav-icon">🧘</div>
+    <div class="nav-label">拉伸</div>
+  </div>
+  <div class="nav-item" data-tab="ted">
+    <div class="nav-icon">📖</div>
+    <div class="nav-label">英语</div>
+  </div>
+  <div class="nav-item" data-tab="settings">
+    <div class="nav-icon">⚙️</div>
+    <div class="nav-label">设置</div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">通知内容</div>
+
+<!-- 内嵌浏览器 -->
+<div class="iab-overlay" id="iabOverlay">
+  <div class="iab-toolbar">
+    <button class="iab-back-btn" onclick="closeIAB()">‹</button>
+    <div class="iab-title" id="iabTitle">加载中...</div>
+    <button class="iab-open-external" onclick="openExternal()">↗</button>
+  </div>
+  <div class="iab-frame-wrap">
+    <div class="iab-loading" id="iabLoading">
+      <div class="iab-spinner"></div>
+      <div class="iab-loading-text" id="iabLoadingText">正在加载...</div>
+    </div>
+    <div class="iab-error" id="iabError">
+      <div class="iab-error-icon">😕</div>
+      <div class="iab-error-title">无法在 App 内打开</div>
+      <div class="iab-error-desc" id="iabErrorDesc">该网站限制了内嵌访问，点击下方按钮用 Safari 打开</div>
+      <button class="iab-error-btn" onclick="openExternal()">用 Safari 打开</button>
+    </div>
+    <iframe class="iab-frame" id="iabFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"></iframe>
+  </div>
+</div>
+
+<script>
+// ===== 内嵌浏览器 (In-App Browser) =====
+// 解决：微信内拦截 + PWA 主屏幕跳转后回不来
+// 方案：智能判断——可嵌入的站点用 iframe，不可嵌入的用 Safari 打开
+let currentIABUrl = '';
+
+// 已知禁止 iframe 嵌入的站点（设置了 X-Frame-Options 或 CSP frame-ancestors）
+const BLOCKED_DOMAINS = [
+  'weibo.com', 'm.weibo.cn',
+  'zhihu.com',
+  'bilibili.com',
+  'douyin.com',
+  'xiaohongshu.com',
+  'toutiao.com',
+  '163.com',
+  'qq.com', 'news.qq.com',
+  'baidu.com',
+  'xiaoyuzhoufm.com',
+  'microsoft.com',
+  'google.com',
+];
+
+// 确认可嵌入的站点
+const EMBEDDABLE_DOMAINS = [
+  'smzdm.com',
+  '9english.net',
+  'etw.fm',
+  'iqiyi.com',
+  'douban.com',
+];
+
+function isBlocked(url) {
+  let domain = '';
+  try { domain = new URL(url).hostname; } catch(e) { return false; }
+  if (EMBEDDABLE_DOMAINS.some(d => domain.includes(d))) return false;
+  return BLOCKED_DOMAINS.some(d => domain.includes(d));
+}
+
+function openUrl(url) {
+  const isWeChat = /MicroMessenger/i.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+
+  if (isWeChat) {
+    // 微信内：复制链接 + 提示
+    openInWeChatFallback(url);
+  } else if (isStandalone) {
+    // PWA 主屏幕模式：用 <a target="_blank"> 在 Safari 新页面打开
+    // 用户看完关闭 Safari，自动回到 App（这是 iOS PWA 最可靠的跳转方式）
+    openInSafari(url);
+  } else {
+    // 普通浏览器：新标签页打开
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+}
+
+// PWA 模式下用 Safari 打开链接
+// 原理：创建一个 <a target="_blank"> 并模拟点击
+// iOS PWA 中这会打开 Safari，用户看完关闭就回到 App
+function openInSafari(url) {
+  const a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+// 微信内的降级方案
+function openInWeChatFallback(url) {
+  let domain = '';
+  try { domain = new URL(url).hostname; } catch(e) { domain = '该网站'; }
+
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => {
+      showToast('📋 链接已复制，请点右上角···用浏览器打开');
+    }).catch(() => {
+      showToast('⚠️ 微信限制跳转，请点右上角··→在浏览器打开');
+    });
+  } else {
+    // 降级：用 textarea + execCommand 兼容旧版 iOS
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); showToast('📋 链接已复制，请点右上角···用浏览器打开'); }
+    catch(e) { showToast('⚠️ 请点右上角···→在浏览器打开'); }
+    document.body.removeChild(ta);
+  }
+}
+
+// 内嵌浏览器（仅用于可嵌入站点）
+function openIAB(url) {
+  currentIABUrl = url;
+  const overlay = document.getElementById('iabOverlay');
+  const frame = document.getElementById('iabFrame');
+  const loading = document.getElementById('iabLoading');
+  const error = document.getElementById('iabError');
+  const title = document.getElementById('iabTitle');
+  const loadingText = document.getElementById('iabLoadingText');
+
+  let domain = '';
+  try { domain = new URL(url).hostname.replace('www.', ''); } catch(e) { domain = '加载中...'; }
+  title.textContent = domain;
+  loadingText.textContent = '正在加载 ' + domain + ' ...';
+
+  loading.style.display = 'flex';
+  error.classList.remove('show');
+  overlay.classList.add('show');
+
+  frame.src = url;
+
+  let loaded = false;
+  const timeout = setTimeout(() => {
+    if (!loaded) {
+      loadingText.textContent = '加载较慢，可点击右上角 ↗ 用 Safari 打开';
+    }
+  }, 6000);
+
+  frame.onload = function() {
+    loaded = true;
+    clearTimeout(timeout);
+    setTimeout(() => { loading.style.display = 'none'; }, 300);
+    try {
+      const fTitle = frame.contentDocument ? frame.contentDocument.title : '';
+      if (fTitle) title.textContent = fTitle;
+    } catch(e) {}
+  };
+
+  frame.onerror = function() {
+    clearTimeout(timeout);
+    showIABError(url);
+  };
+}
+
+function showIABError(url) {
+  document.getElementById('iabLoading').style.display = 'none';
+  document.getElementById('iabError').classList.add('show');
+  let domain = '';
+  try { domain = new URL(url).hostname; } catch(e) { domain = '该网站'; }
+  document.getElementById('iabErrorDesc').textContent =
+    domain + ' 限制了内嵌访问，请用 Safari 打开';
+}
+
+function closeIAB() {
+  const overlay = document.getElementById('iabOverlay');
+  const frame = document.getElementById('iabFrame');
+  overlay.classList.remove('show');
+  frame.src = 'about:blank';
+  currentIABUrl = '';
+}
+
+function openExternal() {
+  if (currentIABUrl) {
+    closeIAB();
+    // PWA 中用 location.href 跳转到 Safari
+    setTimeout(() => {
+      window.location.href = currentIABUrl;
+    }, 100);
+  }
+}
+
+// ===== 平台热搜入口 =====
+const platforms = [
+  { name: '微博热搜', emoji: '🔥', url: 'https://m.weibo.cn/api/container/getIndex?containerid=106003type%3D25%26t%3D3%26disable_hot%3D1%26filter_type%3Drealtimehot', class: 'weibo', simpleUrl: 'https://m.weibo.cn/search?containerid=106003type%3D25%26t%3D3%26disable_hot%3D1%26filter_type%3Drealtimehot' },
+  { name: '小红书', emoji: '📕', url: 'https://www.xiaohongshu.com/explore', class: 'xhs' },
+  { name: '知乎热榜', emoji: '💡', url: 'https://www.zhihu.com/hot', class: 'zhihu' },
+  { name: '抖音热点', emoji: '🎵', url: 'https://www.douyin.com/hot', class: 'douyin' },
+  { name: '今日头条', emoji: '📰', url: 'https://www.toutiao.com/', class: 'toutiao' },
+  { name: 'B站热门', emoji: '📺', url: 'https://m.bilibili.com/index.html', class: 'bilibili' },
+  { name: '百度热搜', emoji: '🔍', url: 'https://top.baidu.com/board?tab=realtime', class: 'baidu' },
+  { name: '腾讯新闻', emoji: '🐧', url: 'https://news.qq.com/', class: 'tencent' },
+];
+
+// 渲染平台热搜
+const platformGrid = document.getElementById('platformGrid');
+platforms.forEach(p => {
+  const div = document.createElement('div');
+  div.className = 'platform-card ' + p.class;
+  div.onclick = () => openUrl(p.url);
+  div.innerHTML = `
+    <div class="platform-emoji">${p.emoji}</div>
+    <div class="platform-name">${p.name}</div>
+  `;
+  platformGrid.appendChild(div);
+});
+
+// ===== 播客数据（小宇宙） =====
+const podcasts = [
+  {
+    name: '日谈公园',
+    host: '李叔 / 小北',
+    desc: '聊聊旅行、文化、电影、生活，轻松有趣的长谈节目，小宇宙年度热门播客。',
+    tag: '生活文化',
+    cover: '🌅',
+    color: 'rgba(245,158,11,0.2)',
+    url: 'https://www.xiaoyuzhoufm.com/podcast/5e280faa418a84a0461f9ad8'
+  },
+  {
+    name: '展开讲讲',
+    host: '小畅 / 阳子',
+    desc: '专题式讨论好内容，每期以一个主题串联起多部作品，电影、书籍深度解读。',
+    tag: '影视文化',
+    cover: '🎬',
+    color: 'rgba(236,72,153,0.2)',
+    url: 'https://www.xiaoyuzhoufm.com/podcast/5e280faa418a84a0461f9bfb'
+  },
+  {
+    name: '声东击西',
+    host: '徐涛',
+    desc: '通过创新的声音实验与深度访谈，帮你厘清社会议题和国际新闻背后的逻辑。',
+    tag: '国际时事',
+    cover: '🌍',
+    color: 'rgba(59,130,246,0.2)',
+    url: 'https://www.xiaoyuzhoufm.com/podcast/5e2831ed418a84a046231c00'
+  },
+  {
+    name: '无聊斋',
+    host: '刘旸教主',
+    desc: '一档无聊又有聊的脱口秀播客，单口喜剧演员视角解读生活趣事。',
+    tag: '喜剧脱口秀',
+    cover: '😄',
+    color: 'rgba(168,85,247,0.2)',
+    url: 'https://www.xiaoyuzhoufm.com/podcast/5e280fac418a84a0461fb129'
+  },
+  {
+    name: '岩中花述',
+    host: '鲁豫 / GIADA',
+    desc: '意大利奢侈品牌GIADA出品，邀请各行各业的女性分享她们的故事与思考。',
+    tag: '女性成长',
+    cover: '🌸',
+    color: 'rgba(236,72,153,0.2)',
+    url: 'https://www.xiaoyuzhoufm.com/podcast/625635587bfca4e73e990703'
+  },
+  {
+    name: '文化有限',
+    host: '大壹 / 超哥 / 星晨',
+    desc: '三个文化从业者聊书，每期一本好书，从不同角度展开分享阅读感悟。',
+    tag: '读书分享',
+    cover: '📚',
+    color: 'rgba(16,185,129,0.2)',
+    url: 'https://www.xiaoyuzhoufm.com/podcast/5e7a8f3b418a84a0461fcd6b'
+  },
+];
+
+// 渲染播客
+const podcastList = document.getElementById('podcastList');
+podcasts.forEach(p => {
+  const div = document.createElement('div');
+  div.className = 'podcast-card';
+  div.onclick = () => openUrl(p.url);
+  div.innerHTML = `
+    <div class="podcast-cover" style="background:${p.color}">${p.cover}</div>
+    <div class="podcast-info">
+      <div class="podcast-name">${p.name}</div>
+      <div class="podcast-host">主播：${p.host}</div>
+      <div class="podcast-desc">${p.desc}</div>
+      <span class="podcast-tag">${p.tag}</span>
+    </div>
+  `;
+  podcastList.appendChild(div);
+});
+
+// ===== 新闻数据 =====
+const newsData = [
+  { time: "08:12", tag: "domestic", title: "LV集团首回应在华诉讼争议：会全力保护好我们的品牌", url: "https://www.163.com/dy/article/L2TLDAUE0512B07B.html", hot: true },
+  { time: "08:05", tag: "international", title: "米莱在巴西发表侮辱性言论 巴西宣布召回驻阿根廷大使", url: "https://www.163.com/dy/article/L2TICG9U0514R9OJ.html", hot: false },
+  { time: "08:00", tag: "international", title: "特朗普：所有与伊朗打交道的人都请求我不要开火", url: "https://www.163.com/dy/article/L2TKCLA6051482MP.html", hot: true },
+  { time: "07:34", tag: "domestic", title: "公职人员被举报以2元买走价值8亿元股权 河北衡水通报", url: "https://www.163.com/dy/article/L2TICHP40514R9OJ.html", hot: true },
+  { time: "07:30", tag: "domestic", title: "王虹得奖后报告现场座无虚席 导师笑着在门外扒窗聆听", url: "https://www.163.com/dy/article/L2TF16MV051494GR.html", hot: false },
+  { time: "07:25", tag: "domestic", title: "860元1晚的酒店凌晨定时关闭中央空调 住客多次被热醒", url: "https://www.163.com/dy/article/L2RRT63905509IQZ.html", hot: false },
+  { time: "07:15", tag: "domestic", title: "长鑫科技让合肥坐上A股总市值第四城 身前只剩北深上", url: "https://www.163.com/dy/article/L2TH2SJQ0514R9P4.html", hot: true },
+  { time: "07:06", tag: "domestic", title: "老人600万积蓄说没就没 瞬间\"穿越\"到千里外黄金市场", url: "https://www.163.com/dy/article/L2S1U0E80514EGPO.html", hot: false },
+  { time: "昨日", tag: "international", title: "高市黑历史再被披露 曾称日本入侵中国不是侵略是自卫", url: "https://www.163.com/news/article/L2SJVQH800019B3E.html", hot: true },
+  { time: "昨日", tag: "international", title: "泽连斯基被指\"打通\"两场热战 摘伊朗\"战果\"给英美送礼", url: "https://www.163.com/dy/article/L2SFUDAU055040N3.html", hot: false },
+  { time: "昨日", tag: "domestic", title: "女子称中奖3万兑奖遭拒 商务局：她没中奖 不存在顶替", url: "https://www.163.com/news/article/L2SK938G0001899O.html", hot: false },
+  { time: "昨日", tag: "domestic", title: "新租客打扫卫生 卧室柜子上掉落4万现金和4个银行封条", url: "https://www.163.com/news/article/L2SK43BJ0001899O.html", hot: false },
+  { time: "昨日", tag: "international", title: "媒体：特朗普虚晃一枪 时隔一天对伊态度180度大转弯", url: "https://www.163.com/dy/article/L2S0T59S055040N3.html", hot: false },
+  { time: "昨日", tag: "domestic", title: "河南基层招录两场考试有考生13天提高近30分 官方调查", url: "https://www.163.com/dy/article/L2SDTBHU0514BE2Q.html", hot: false },
+  { time: "昨日", tag: "domestic", title: "高考699分女生被清华大学录取 被称\"女版庞众望\"", url: "https://www.163.com/dy/article/L2SFR64B051492T3.html", hot: true },
+  { time: "昨日", tag: "domestic", title: "长鑫上市造富：股民赚2万 高管赚十亿 合肥赚万亿", url: "https://www.163.com/dy/article/L2S9Q4O6053469M5.html", hot: true },
+  { time: "昨日", tag: "domestic", title: "女童疑接受基因编辑后死亡 其家庭为试验提供86万美元", url: "https://www.163.com/dy/article/L2S99T150512B07B.html", hot: true },
+  { time: "昨日", tag: "international", title: "日本著名推理小说家东野圭吾去世 享年68岁", url: "https://www.163.com/dy/article/L2RR2Q1L0534A4SC.html", hot: true },
+  { time: "昨日", tag: "domestic", title: "国内新冠疫情已升至中流行水平 中国疾控提醒", url: "https://www.163.com/dy/article/L2P9CSRQ05128U4M.html", hot: true },
+  { time: "昨日", tag: "international", title: "美对华加征12.5%的301关税 商务部回应", url: "https://www.163.com/dy/article/L2S5CCBE0534A4SC.html", hot: false },
+];
+
+// 渲染新闻（静态数据作为兜底）
+const newsList = document.getElementById('newsList');
+function renderNews(items) {
+  newsList.innerHTML = '';
+  items.forEach(n => {
+    const tagText = n.tag === 'domestic' ? '国内' : '国际';
+    const div = document.createElement('div');
+    div.className = 'news-card' + (n.hot ? ' hot' : '');
+    div.onclick = () => openUrl(n.url);
+    div.innerHTML = `
+      <div class="news-meta">
+        <span class="news-time">${n.time}</span>
+        <span class="news-cat ${n.tag}">${tagText}</span>
+        ${n.hot ? '<span class="news-hot">🔥 热门</span>' : ''}
+      </div>
+      <div class="news-title">${n.title}</div>
+    `;
+    newsList.appendChild(div);
+  });
+}
+// 先渲染静态数据
+renderNews(newsData);
+
+// ===== 实时热搜 API（每6小时自动刷新） =====
+const HOT_API = 'https://api-hot.imsyy.top';
+const NEWS_CACHE_KEY = 'dudu_hot_cache';
+const CACHE_DURATION = 6 * 60 * 60 * 1000; // 6小时
+
+// 从缓存或API加载实时热搜
+async function loadLiveHot() {
+  // 检查缓存是否有效
+  try {
+    const cached = JSON.parse(localStorage.getItem(NEWS_CACHE_KEY) || '{}');
+    if (cached.time && Date.now() - cached.time < CACHE_DURATION && cached.data) {
+      renderLiveNews(cached.data);
+      updateNewsRefreshTime(cached.time);
+      return;
+    }
+  } catch(e) {}
+
+  // 从API拉取
+  await fetchLiveNews();
+}
+
+// 拉取多个平台的实时热搜
+async function fetchLiveNews() {
+  const platforms = [
+    { name: 'netease-news', label: '网易', tag: 'domestic' },
+    { name: 'qq-news', label: '腾讯', tag: 'domestic' },
+    { name: 'baidu', label: '百度', tag: 'domestic' },
+    { name: 'weibo', label: '微博', tag: 'domestic' },
+  ];
+
+  const allNews = [];
+  const now = new Date();
+  const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+  for (const p of platforms) {
+    try {
+      const resp = await fetch(`${HOT_API}/${p.name}`, { timeout: 8000 });
+      if (!resp.ok) continue;
+      const json = await resp.json();
+      if (json.code === 200 && json.data) {
+        json.data.slice(0, 6).forEach((item, idx) => {
+          allNews.push({
+            time: timeStr,
+            tag: p.tag,
+            title: `[${p.label}] ${item.title}`,
+            url: item.url || item.mobileUrl || '#',
+            hot: idx < 3,
+          });
+        });
+      }
+    } catch(e) { /* 平台失败跳过 */ }
+  }
+
+  if (allNews.length > 0) {
+    // 合并静态新闻（取前5条作为补充）
+    const fallback = newsData.slice(0, 5).map(n => ({ ...n }));
+    const combined = [...allNews, ...fallback].slice(0, 25);
+
+    // 缓存
+    const cacheData = { time: Date.now(), data: combined };
+    try { localStorage.setItem(NEWS_CACHE_KEY, JSON.stringify(cacheData)); } catch(e) {}
+
+    renderLiveNews(combined);
+    updateNewsRefreshTime(Date.now());
+    showToast('📰 热点已更新为最新');
+  }
+}
+
+// 渲染实时新闻
+function renderLiveNews(items) {
+  newsList.innerHTML = '';
+  items.forEach(n => {
+    const tagText = n.tag === 'domestic' ? '国内' : '国际';
+    const div = document.createElement('div');
+    div.className = 'news-card' + (n.hot ? ' hot' : '');
+    div.onclick = () => openUrl(n.url);
+    div.innerHTML = `
+      <div class="news-meta">
+        <span class="news-time">${n.time}</span>
+        <span class="news-cat ${n.tag}">${tagText}</span>
+        ${n.hot ? '<span class="news-hot">🔥 热门</span>' : ''}
+      </div>
+      <div class="news-title">${n.title}</div>
+    `;
+    newsList.appendChild(div);
+  });
+}
+
+// 更新刷新时间显示
+function updateNewsRefreshTime(timestamp) {
+  const d = new Date(timestamp);
+  const h = String(d.getHours()).padStart(2,'0');
+  const m = String(d.getMinutes()).padStart(2,'0');
+  const label = document.querySelector('#tab-news .section-label:last-child');
+  if (label) label.textContent = `实时热点 · 最后更新 ${h}:${m}（每6小时自动刷新）`;
+}
+
+// 手动刷新按钮
+function refreshNews() {
+  showToast('🔄 正在获取最新热点...');
+  // 清除缓存强制刷新
+  try { localStorage.removeItem(NEWS_CACHE_KEY); } catch(e) {}
+  fetchLiveNews();
+}
+
+// 页面加载时拉取实时热搜
+loadLiveHot();
+
+// 每6小时自动刷新一次
+setInterval(() => {
+  try { localStorage.removeItem(NEWS_CACHE_KEY); } catch(e) {}
+  fetchLiveNews();
+}, CACHE_DURATION);
+
+// 每次切换到新闻Tab时检查是否需要刷新
+document.querySelectorAll('[data-tab="news"]').forEach(el => {
+  el.addEventListener('click', () => {
+    try {
+      const cached = JSON.parse(localStorage.getItem(NEWS_CACHE_KEY) || '{}');
+      if (!cached.time || Date.now() - cached.time > CACHE_DURATION) {
+        fetchLiveNews();
+      }
+    } catch(e) {}
+  });
+});
+
+// ===== 时钟 =====
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  document.getElementById('clock').textContent = `${h}:${m}`;
+
+  const days = ['日','一','二','三','四','五','六'];
+  document.getElementById('dateStr').textContent =
+    `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 星期${days[now.getDay()]}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ===== Tab 切换 =====
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + tabName).classList.add('active');
+  document.querySelectorAll(`.tab[data-tab="${tabName}"]`).forEach(t => t.classList.add('active'));
+  document.querySelectorAll(`.nav-item[data-tab="${tabName}"]`).forEach(n => n.classList.add('active'));
+}
+document.querySelectorAll('.tab, .nav-item').forEach(el => {
+  el.addEventListener('click', () => switchTab(el.dataset.tab));
+});
+
+// ===== 任务打卡 =====
+const STORAGE_KEY = 'dudu_tasks';
+const tasks = document.querySelectorAll('.task-card');
+
+function getTodayKey() {
+  const d = new Date();
+  return `${STORAGE_KEY}_${d.getFullYear()}${d.getMonth()+1}${d.getDate()}`;
+}
+
+function loadTasks() {
+  try {
+    const saved = localStorage.getItem(getTodayKey());
+    return saved ? JSON.parse(saved) : {};
+  } catch { return {}; }
+}
+
+function saveTasks(state) {
+  try { localStorage.setItem(getTodayKey(), JSON.stringify(state)); } catch {}
+}
+
+function updateProgress() {
+  const total = tasks.length;
+  const done = document.querySelectorAll('.task-card.done').length;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  const circumference = 2 * Math.PI * 30;
+  const offset = circumference - (pct / 100) * circumference;
+  document.getElementById('progressFg').style.strokeDashoffset = offset;
+  document.getElementById('progressText').textContent = pct + '%';
+
+  const detail = document.getElementById('progressDetail');
+  const title = document.getElementById('progressTitle');
+  if (pct === 0) {
+    title.textContent = '今日任务进度';
+    detail.textContent = '加油杜杜！开始今天的第一项任务吧 🚀';
+  } else if (pct < 50) {
+    title.textContent = '今日任务进度';
+    detail.textContent = `已完成 ${done}/${total} 项，继续保持节奏 💪`;
+  } else if (pct < 100) {
+    title.textContent = '今日任务进度';
+    detail.textContent = `已完成 ${done}/${total} 项，过半啦，冲刺！🔥`;
+  } else {
+    title.textContent = '全部完成！🎉';
+    detail.textContent = '太棒了杜杜！今天的任务全部搞定 ✨';
+  }
+}
+
+const taskState = loadTasks();
+tasks.forEach(task => {
+  const id = task.dataset.task;
+  if (taskState[id]) task.classList.add('done');
+  task.addEventListener('click', (e) => {
+    if (e.target.closest('.task-action')) return;
+    task.classList.toggle('done');
+    taskState[id] = task.classList.contains('done');
+    saveTasks(taskState);
+    updateProgress();
+    if (task.classList.contains('done')) {
+      const name = task.querySelector('.task-name').textContent;
+      showToast(`✓ ${name} 完成！`);
+    }
+  });
+});
+updateProgress();
+
+// ===== Toast =====
+let toastTimer;
+function showToast(text) {
+  const toast = document.getElementById('toast');
+  toast.textContent = text;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ===== 通知权限 =====
+function checkNotifPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    document.getElementById('notifPermission').classList.add('show');
+  }
+}
+checkNotifPermission();
+
+function requestNotification() {
+  if ('Notification' in window) {
+    Notification.requestPermission().then(p => {
+      if (p === 'granted') {
+        showToast('✓ 通知已开启，到点会提醒你！');
+        document.getElementById('notifPermission').classList.remove('show');
+        new Notification('杜杜工作台', { body: '通知已开启，9:20 会提醒你按摩哦~' });
+      } else {
+        showToast('通知未开启，可在设置中手动开启');
+      }
+    });
+  }
+}
+
+// ===== 定时提醒 =====
+const settings = {
+  massage: true,
+  stretch: true,
+  ted: true
+};
+
+function checkReminders() {
+  const now = new Date();
+  const h = now.getHours();
+  const m = now.getMinutes();
+  const key = `reminded_${h}_${m}`;
+
+  // 按摩提醒 9:20
+  if (settings.massage && h === 9 && m === 20 && !sessionStorage.getItem(key)) {
+    sessionStorage.setItem(key, '1');
+    showToast('⏰ 9:20 按摩时间到！放下手头的事放松一下~');
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('⏰ 按摩提醒', { body: '9:20 按摩时间到！放下手头的事放松一下~' });
+    }
+  }
+
+  // 拉伸提醒 10:00
+  if (settings.stretch && h === 10 && m === 0 && !sessionStorage.getItem(key)) {
+    sessionStorage.setItem(key, '1');
+    showToast('🧘 该做拉伸啦！10-15分钟跟练视频已准备好');
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('🧘 拉伸提醒', { body: '该做拉伸啦！10-15分钟跟练视频已准备好' });
+    }
+  }
+
+  // TED提醒 20:00
+  if (settings.ted && h === 20 && m === 0 && !sessionStorage.getItem(key)) {
+    sessionStorage.setItem(key, '1');
+    showToast('📖 晚上好！该开始英语学习了（TED+BBC）');
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('📖 英语学习提醒', { body: '晚上好！该开始英语学习了（TED+BBC）' });
+    }
+  }
+}
+setInterval(checkReminders, 20000);
+
+// ===== 设置开关 =====
+function toggleSwitch(key) {
+  const sw = document.getElementById('switch' + key.charAt(0).toUpperCase() + key.slice(1));
+  sw.classList.toggle('on');
+  settings[key] = sw.classList.contains('on');
+  showToast(settings[key] ? '已开启提醒' : '已关闭提醒');
+}
+
+// ===== 重置任务 =====
+function resetTasks() {
+  tasks.forEach(t => t.classList.remove('done'));
+  Object.keys(taskState).forEach(k => taskState[k] = false);
+  saveTasks(taskState);
+  updateProgress();
+  showToast('今日任务已重置');
+}
+
+// ===== 清除缓存 =====
+function clearCache() {
+  Object.keys(localStorage).forEach(key => {
+    if (key.startsWith(STORAGE_KEY)) localStorage.removeItem(key);
+  });
+  resetTasks();
+  showToast('缓存已清除');
+}
+
+// ===== PWA 注册 =====
+if ('serviceWorker' in navigator) {
+  // 内联 Service Worker 注册（通过 Blob）
+  const swCode = `
+    const CACHE_NAME = 'dudu-workbench-v1';
+    self.addEventListener('install', e => { self.skipWaiting(); });
+    self.addEventListener('activate', e => { e.waitUntil(self.clients.claim()); });
+    self.addEventListener('fetch', e => {
+      e.respondWith(
+        caches.match(e.request).then(r => r || fetch(e.request).catch(() => caches.match('/')))
+      );
+    });
+  `;
+  try {
+    const blob = new Blob([swCode], { type: 'application/javascript' });
+    const swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl).catch(() => {});
+  } catch(e) {}
+}
+</script>
+</body>
+</html>
