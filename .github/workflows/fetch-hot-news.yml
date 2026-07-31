@@ -1,0 +1,175 @@
+name: 更新热搜数据
+
+on:
+  schedule:
+    - cron: '0 0,6,12,18 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch-hot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装依赖
+        run: pip3 install requests beautifulsoup4
+
+      - name: 抓取热搜数据
+        run: |
+          python3 << 'PYEOF'
+          import requests
+          import json
+          import os
+          from bs4 import BeautifulSoup
+          from datetime import datetime
+
+          headers = {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+          }
+
+          all_news = []
+          now = datetime.utcnow()
+          time_str = now.strftime('%H:%M')
+
+          # 1. 微博热搜
+          try:
+              resp = requests.get('https://weibo.com/ajax/side/hotSearch', headers=headers, timeout=10)
+              if resp.status_code == 200:
+                  data = resp.json()
+                  items = data.get('data', {}).get('realtime', [])
+                  for i, item in enumerate(items[:8]):
+                      word = item.get('word', '')
+                      if word:
+                          all_news.append({
+                              'time': time_str,
+                              'tag': 'domestic',
+                              'title': f'[微博] {word}',
+                              'url': f'https://s.weibo.com/weibo?q=%23{word}%23',
+                              'hot': i < 3
+                          })
+          except Exception as e:
+              print(f'微博失败: {e}')
+
+          # 2. 百度热搜
+          try:
+              resp = requests.get('https://top.baidu.com/board?tab=realtime', headers=headers, timeout=10)
+              if resp.status_code == 200:
+                  soup = BeautifulSoup(resp.text, 'html.parser')
+                  items = soup.select('.c-single-text-ellipsis')
+                  for i, item in enumerate(items[:8]):
+                      title = item.get_text(strip=True)
+                      link = item.find_parent('a')
+                      url = link.get('href', '') if link else ''
+                      if title:
+                          all_news.append({
+                              'time': time_str,
+                              'tag': 'domestic',
+                              'title': f'[百度] {title}',
+                              'url': url,
+                              'hot': i < 3
+                          })
+          except Exception as e:
+              print(f'百度失败: {e}')
+
+          # 3. 知乎热榜
+          try:
+              resp = requests.get('https://www.zhihu.com/api/v3/feed/topstory/hot-lists/total?limit=8',
+                                  headers={**headers, 'Referer': 'https://www.zhihu.com/hot'}, timeout=10)
+              if resp.status_code == 200:
+                  data = resp.json()
+                  for i, item in enumerate(data.get('data', [])[:8]):
+                      target = item.get('target', {})
+                      title = target.get('title', '')
+                      qid = target.get('id', '')
+                      if title:
+                          all_news.append({
+                              'time': time_str,
+                              'tag': 'domestic',
+                              'title': f'[知乎] {title}',
+                              'url': f'https://www.zhihu.com/question/{qid}',
+                              'hot': i < 3
+                          })
+          except Exception as e:
+              print(f'知乎失败: {e}')
+
+          # 4. 抖音热搜
+          try:
+              resp = requests.get('https://www.iesdouyin.com/web/api/v2/hotsearch/billboard/word/',
+                                  headers=headers, timeout=10)
+              if resp.status_code == 200:
+                  data = resp.json()
+                  for i, item in enumerate(data.get('word_list', [])[:8]):
+                      title = item.get('word', '')
+                      if title:
+                          all_news.append({
+                              'time': time_str,
+                              'tag': 'domestic',
+                              'title': f'[抖音] {title}',
+                              'url': 'https://www.douyin.com/',
+                              'hot': i < 3
+                          })
+          except Exception as e:
+              print(f'抖音失败: {e}')
+
+          # 5. 头条热搜
+          try:
+              resp = requests.get('https://www.toutiao.com/hot-event/hot-board/?origin=toutiao_pc',
+                                  headers=headers, timeout=10)
+              if resp.status_code == 200:
+                  data = resp.json()
+                  for i, item in enumerate(data.get('data', [])[:8]):
+                      title = item.get('Title', '')
+                      url = item.get('Url', '')
+                      if title:
+                          all_news.append({
+                              'time': time_str,
+                              'tag': 'domestic',
+                              'title': f'[头条] {title}',
+                              'url': url,
+                              'hot': i < 3
+                          })
+          except Exception as e:
+              print(f'头条失败: {e}')
+
+          # 6. B站热搜
+          try:
+              resp = requests.get('https://app.bilibili.com/x/v2/search/trending/ranking?limit=8',
+                                  headers=headers, timeout=10)
+              if resp.status_code == 200:
+                  data = resp.json()
+                  for i, item in enumerate(data.get('data', {}).get('list', [])[:8]):
+                      title = item.get('keyword', '')
+                      if title:
+                          all_news.append({
+                              'time': time_str,
+                              'tag': 'domestic',
+                              'title': f'[B站] {title}',
+                              'url': f'https://search.bilibili.com/all?keyword={title}',
+                              'hot': i < 3
+                          })
+          except Exception as e:
+              print(f'B站失败: {e}')
+
+          result = {
+              'updateTime': now.strftime('%Y-%m-%d %H:%M UTC'),
+              'count': len(all_news),
+              'news': all_news[:30]
+          }
+
+          os.makedirs('data', exist_ok=True)
+          with open('data/hot-news.json', 'w', encoding='utf-8') as f:
+              json.dump(result, f, ensure_ascii=False, indent=2)
+
+          print(f'总计获取 {len(all_news)} 条热搜')
+          PYEOF
+
+      - name: 提交数据
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/hot-news.json
+          git diff --staged --quiet || git commit -m "自动更新热搜数据 - $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push
