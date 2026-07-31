@@ -1361,14 +1361,14 @@ function renderNews(items) {
 // 先渲染静态数据
 renderNews(newsData);
 
-// ===== 实时热搜 API（每6小时自动刷新） =====
-const HOT_API = 'https://api-hot.imsyy.top';
+// ===== 热搜数据（GitHub Actions 每6小时自动抓取，存储在 data/hot-news.json）=====
+const HOT_JSON = 'data/hot-news.json';
 const NEWS_CACHE_KEY = 'dudu_hot_cache';
 const CACHE_DURATION = 6 * 60 * 60 * 1000; // 6小时
 
-// 从缓存或API加载实时热搜
+// 从仓库JSON文件加载热搜
 async function loadLiveHot() {
-  // 检查缓存是否有效
+  // 先检查本地缓存
   try {
     const cached = JSON.parse(localStorage.getItem(NEWS_CACHE_KEY) || '{}');
     if (cached.time && Date.now() - cached.time < CACHE_DURATION && cached.data) {
@@ -1378,54 +1378,38 @@ async function loadLiveHot() {
     }
   } catch(e) {}
 
-  // 从API拉取
+  // 从仓库读取 JSON 文件
   await fetchLiveNews();
 }
 
-// 拉取多个平台的实时热搜
+// 从仓库的 data/hot-news.json 拉取热搜
 async function fetchLiveNews() {
-  const platforms = [
-    { name: 'netease-news', label: '网易', tag: 'domestic' },
-    { name: 'qq-news', label: '腾讯', tag: 'domestic' },
-    { name: 'baidu', label: '百度', tag: 'domestic' },
-    { name: 'weibo', label: '微博', tag: 'domestic' },
-  ];
+  try {
+    // 加时间戳防止CDN缓存
+    const resp = await fetch(`${HOT_JSON}?t=${Date.now()}`, { cache: 'no-store' });
+    if (!resp.ok) {
+      console.log('热搜JSON文件还未生成，使用静态数据');
+      return;
+    }
+    const json = await resp.json();
+    if (json.news && json.news.length > 0) {
+      const data = json.news.map(n => ({
+        time: n.time || '',
+        tag: n.tag || 'domestic',
+        title: n.title || '',
+        url: n.url || '#',
+        hot: n.hot || false,
+      }));
 
-  const allNews = [];
-  const now = new Date();
-  const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+      // 缓存到本地
+      const cacheData = { time: Date.now(), data: data };
+      try { localStorage.setItem(NEWS_CACHE_KEY, JSON.stringify(cacheData)); } catch(e) {}
 
-  for (const p of platforms) {
-    try {
-      const resp = await fetch(`${HOT_API}/${p.name}`, { timeout: 8000 });
-      if (!resp.ok) continue;
-      const json = await resp.json();
-      if (json.code === 200 && json.data) {
-        json.data.slice(0, 6).forEach((item, idx) => {
-          allNews.push({
-            time: timeStr,
-            tag: p.tag,
-            title: `[${p.label}] ${item.title}`,
-            url: item.url || item.mobileUrl || '#',
-            hot: idx < 3,
-          });
-        });
-      }
-    } catch(e) { /* 平台失败跳过 */ }
-  }
-
-  if (allNews.length > 0) {
-    // 合并静态新闻（取前5条作为补充）
-    const fallback = newsData.slice(0, 5).map(n => ({ ...n }));
-    const combined = [...allNews, ...fallback].slice(0, 25);
-
-    // 缓存
-    const cacheData = { time: Date.now(), data: combined };
-    try { localStorage.setItem(NEWS_CACHE_KEY, JSON.stringify(cacheData)); } catch(e) {}
-
-    renderLiveNews(combined);
-    updateNewsRefreshTime(Date.now());
-    showToast('📰 热点已更新为最新');
+      renderLiveNews(data);
+      updateNewsRefreshTime(Date.now());
+    }
+  } catch(e) {
+    console.log('热搜加载失败，使用静态数据', e);
   }
 }
 
@@ -1455,7 +1439,7 @@ function updateNewsRefreshTime(timestamp) {
   const h = String(d.getHours()).padStart(2,'0');
   const m = String(d.getMinutes()).padStart(2,'0');
   const label = document.querySelector('#tab-news .section-label:last-child');
-  if (label) label.textContent = `实时热点 · 最后更新 ${h}:${m}（每6小时自动刷新·以天为基准）`;
+  if (label) label.textContent = `实时热点 · 最后更新 ${h}:${m}（每6小时自动抓取）`;
 }
 
 // 手动刷新按钮
@@ -1463,7 +1447,9 @@ function refreshNews() {
   showToast('🔄 正在获取最新热点...');
   // 清除缓存强制刷新
   try { localStorage.removeItem(NEWS_CACHE_KEY); } catch(e) {}
-  fetchLiveNews();
+  fetchLiveNews().then(() => {
+    showToast('📰 热点已刷新');
+  });
 }
 
 // 页面加载时拉取实时热搜
